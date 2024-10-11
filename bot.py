@@ -1,7 +1,7 @@
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, ChatMemberHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 # Bot token (to be set as an environment variable)
 TOKEN = os.environ.get('BOT_TOKEN')
+
+# GIF URL
+GIF_URL = "https://media1.tenor.com/m/Y5vmrdIrr4wAAAAC/mehdi-casino.gif"
 
 # Messages and offers
 WELCOME_MESSAGE = "🎰Welcome to SafePlay, your guide to the world of safe Crypto Casinos"
@@ -28,16 +31,20 @@ PREFERENCES = {
     'DEPOSIT_BONUS': "Deposit Bonus Casino\n\n💼 Get the best deposit bonuses!\nPlay now ➡️ http://bit.ly/kripty-casino"
 }
 
-async def send_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.info("Welcome message triggered")
     try:
+        # Send the GIF
+        await update.message.reply_animation(GIF_URL)
+        
+        # Send the welcome message with buttons
         keyboard = [
             [InlineKeyboardButton("Activate Bot", callback_data='activate'),
              InlineKeyboardButton("Deactivate Bot", callback_data='deactivate')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.effective_chat.send_message(WELCOME_MESSAGE, reply_markup=reply_markup)
-        logger.info("Welcome message sent successfully")
+        await update.message.reply_text(WELCOME_MESSAGE, reply_markup=reply_markup)
+        logger.info("Welcome message and GIF sent successfully")
     except Exception as e:
         logger.error(f"Error in welcome message: {str(e)}")
 
@@ -50,7 +57,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await query.edit_message_text(text=f"{WELCOME_MESSAGE}\n\n{BIG_OFFER}")
             await show_preferences(update, context)
         elif query.data == 'deactivate':
-            await query.edit_message_text(text="Bot deactivated. Restart the bot to activate again.")
+            await query.edit_message_text(text="Bot deactivated. Send any message to activate again.")
         elif query.data in PREFERENCES:
             await query.message.reply_text(PREFERENCES[query.data])
         logger.info(f"Button callback processed: {query.data}")
@@ -71,48 +78,17 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as e:
         logger.error(f"Error in show_preferences: {str(e)}")
 
-async def track_chats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    result = extract_status_change(update.my_chat_member)
-    if result is None:
-        return
-    was_member, is_member = result
-
-    # If the bot was added to a group or a user started a conversation with it
-    if not was_member and is_member:
-        await send_welcome(update, context)
-
-def extract_status_change(chat_member_update):
-    status_change = chat_member_update.difference().get("status")
-    old_is_member, new_is_member = chat_member_update.difference().get("is_member", (None, None))
-
-    if status_change is None:
-        return None
-
-    old_status, new_status = status_change
-    was_member = old_status in [
-        "member",
-        "creator",
-        "administrator",
-    ] or (old_status == "restricted" and old_is_member is True)
-    is_member = new_status in [
-        "member",
-        "creator",
-        "administrator",
-    ] or (new_status == "restricted" and new_is_member is True)
-
-    return was_member, is_member
-
 def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
-    # Handler for /start command (as a fallback)
-    application.add_handler(CommandHandler("start", send_welcome))
+    # Handler for /start command
+    application.add_handler(CommandHandler("start", welcome))
+    
+    # Handler for all text messages
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
     
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
-
-    # Handler to track when the bot is added to a chat or when a user starts a conversation
-    application.add_handler(ChatMemberHandler(track_chats, ChatMemberHandler.MY_CHAT_MEMBER))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
