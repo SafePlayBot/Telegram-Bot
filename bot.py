@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -28,8 +28,8 @@ PREFERENCES = {
     'DEPOSIT_BONUS': "Deposit Bonus Casino\n\n💼 Get the best deposit bonuses!\nPlay now ➡️ http://bit.ly/kripty-casino"
 }
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logger.info("Start command received")
+async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.info("Welcome message triggered")
     try:
         keyboard = [
             [InlineKeyboardButton("Activate Bot", callback_data='activate'),
@@ -37,9 +37,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(WELCOME_MESSAGE, reply_markup=reply_markup)
-        logger.info("Start command processed successfully")
+        logger.info("Welcome message sent successfully")
     except Exception as e:
-        logger.error(f"Error in start command: {str(e)}")
+        logger.error(f"Error in welcome message: {str(e)}")
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -50,7 +50,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await query.edit_message_text(text=f"{WELCOME_MESSAGE}\n\n{BIG_OFFER}")
             await show_preferences(update, context)
         elif query.data == 'deactivate':
-            await query.edit_message_text(text="Bot deactivated. Send /start to activate again.")
+            await query.edit_message_text(text="Bot deactivated. Send any message to activate again.")
         elif query.data in PREFERENCES:
             await query.message.reply_text(PREFERENCES[query.data])
         logger.info(f"Button callback processed: {query.data}")
@@ -74,7 +74,13 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
-    application.add_handler(CommandHandler("start", start))
+    # Handler for /start command
+    application.add_handler(CommandHandler("start", welcome))
+    
+    # Handler for all text messages
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
+    
+    # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
