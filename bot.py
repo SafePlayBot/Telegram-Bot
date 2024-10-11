@@ -7,7 +7,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Bot token (to be set as an environment variable)
-TOKEN = os.environ.get('7913816987:AAE5FbZ1TD8hGTL923V3wLKGs2f-ZHQXHvw')
+TOKEN = os.environ.get('BOT_TOKEN')
 
 # Messages and offers
 WELCOME_MESSAGE = "🎰Welcome to SafePlay, your guide to the world of safe Crypto Casinos"
