@@ -1,5 +1,7 @@
 import os
 import logging
+from flask import Flask
+from threading import Thread
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -57,13 +59,24 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.reply_text("Choose your preferences:", reply_markup=reply_markup)
 
-def main() -> None:
+def run_bot():
     application = Application.builder().token(TOKEN).build()
-
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
-
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
+# Flask web server
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
 if __name__ == '__main__':
-    main()
+    # Start the bot in a separate thread
+    bot_thread = Thread(target=run_bot)
+    bot_thread.start()
+
+    # Run the Flask web server
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
