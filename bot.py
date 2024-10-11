@@ -1,6 +1,5 @@
 import os
 import logging
-from flask import Flask, request
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -72,27 +71,13 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as e:
         logger.error(f"Error in show_preferences: {str(e)}")
 
-# Flask web server
-app = Flask(__name__)
-
-@app.route('/' + TOKEN, methods=['POST'])
-def webhook():
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    application.process_update(update)
-    return 'OK'
-
-@app.route('/')
-def home():
-    return "Bot is running!"
-
-if __name__ == '__main__':
+def main() -> None:
     application = Application.builder().token(TOKEN).build()
+
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Set the webhook
-    application.bot.set_webhook(url='https://telegram-bot-533k.onrender.com' + TOKEN)
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-    # Run the Flask web server
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+if __name__ == '__main__':
+    main()
