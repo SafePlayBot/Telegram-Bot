@@ -2,7 +2,6 @@ import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
-from aiohttp import web
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -10,9 +9,6 @@ logger = logging.getLogger(__name__)
 
 # Bot token (to be set as an environment variable)
 TOKEN = os.environ.get('BOT_TOKEN')
-
-# Port (to be set as an environment variable or use default)
-PORT = int(os.environ.get('PORT', 8443))  # Use the dynamically assigned port
 
 # GIF URL
 GIF_URL = "https://media1.tenor.com/m/Y5vmrdIrr4wAAAAC/mehdi-casino.gif"
@@ -79,9 +75,6 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as e:
         logger.error(f"Error in show_preferences: {str(e)}")
 
-async def web_handler(request):
-    return web.Response(text="Telegram Bot is running!")
-
 async def main() -> None:
     # Set up the bot application
     application = ApplicationBuilder().token(TOKEN).build()
@@ -95,16 +88,8 @@ async def main() -> None:
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Set webhook URL
-    webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/webhook"
-
-    # Start the bot with the webhook
-    await application.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        url_path='webhook',  # This is the path for the webhook
-        webhook_url=webhook_url,
-    )
+    # Start the bot with polling (instead of webhook)
+    await application.run_polling()
 
 if __name__ == '__main__':
     import asyncio
