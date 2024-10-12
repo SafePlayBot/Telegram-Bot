@@ -42,6 +42,8 @@ if __name__ == '__main__':
 
     # Check if we are already in an event loop
     try:
-        asyncio.get_running_loop().run_until_complete(main())
+        loop = asyncio.get_running_loop()
+        loop.create_task(main())  # Schedule main to run in the existing event loop
+        loop.run_forever()  # Keep the loop running
     except RuntimeError:  # If no event loop is running, run it
         asyncio.run(main())
