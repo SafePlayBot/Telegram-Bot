@@ -3,6 +3,7 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 from aiohttp import web
+import asyncio
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -82,7 +83,7 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def web_handler(request):
     return web.Response(text="Telegram Bot is running!")
 
-def main():
+async def main():
     # Set up the bot application
     application = Application.builder().token(TOKEN).build()
 
@@ -99,13 +100,22 @@ def main():
     app = web.Application()
     app.router.add_get("/", web_handler)
 
-    # Start the bot
-    application.run_webhook(
+    # Start aiohttp server in background
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", PORT)
+    await site.start()
+
+    # Start the bot's webhook
+    await application.start()
+    await application.updater.start_webhook(
         listen="0.0.0.0",
         port=PORT,
-        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/",
-        web_app=app
+        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
     )
 
+    # Run the bot until stopped
+    await application.updater.idle()
+
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
