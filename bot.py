@@ -25,7 +25,7 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         logger.error(f"Error in welcome message: {str(e)}")
 
-async def main() -> None:
+def main() -> None:
     # Set up the bot application
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -34,9 +34,8 @@ async def main() -> None:
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
     # Start the application with polling
-    await application.run_polling()
+    application.run_polling()
 
-# Directly run the main function for event loop management
+# Directly run the main function
 if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
+    main()
