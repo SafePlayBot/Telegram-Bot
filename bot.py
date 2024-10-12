@@ -39,7 +39,9 @@ async def main() -> None:
     # Start the bot with polling
     await application.start()
     await application.updater.start_polling()
-    await application.updater.idle()
+
+    # Keep the bot running
+    await application.start_polling()
 
 if __name__ == '__main__':
     import asyncio
