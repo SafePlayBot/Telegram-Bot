@@ -83,13 +83,15 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as e:
         logger.error(f"Error in show_preferences: {str(e)}")
 
-async def web_app():
-    # Set up a simple web app
+async def web_handler(request):
+    return web.Response(text="Telegram Bot is running!")
+
+async def setup_web_app():
     app = web.Application()
-    app.router.add_get("/", lambda request: web.Response(text="Telegram Bot is running!"))
+    app.router.add_get("/", web_handler)
     return app
 
-async def main() -> None:
+async def main():
     # Set up the bot application
     application = Application.builder().token(TOKEN).build()
 
@@ -107,7 +109,7 @@ async def main() -> None:
     await application.start()
     
     # Set up and start the web app
-    app = await web_app()
+    app = await setup_web_app()
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', PORT)
