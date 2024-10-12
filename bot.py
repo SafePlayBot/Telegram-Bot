@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 TOKEN = os.environ.get('BOT_TOKEN')
 
 # GIF URL
-GIF_URL = "https://i.ibb.co/s6hjSVf/Df.gif"
+GIF_URL = "https://media1.tenor.com/m/rDy3M2M3oroAAAAC/casino-casino-withdraw.gif"
 
 # Messages and offers
 WELCOME_MESSAGE = "🎰Welcome to SafePlay, your guide to the world of safe Crypto Casinos"
