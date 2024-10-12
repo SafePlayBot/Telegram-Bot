@@ -33,15 +33,9 @@ async def main() -> None:
     application.add_handler(CommandHandler("start", welcome))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
-    # Initialize the application
-    await application.initialize()  # Make sure to initialize it before starting
-
     # Start the application with polling
-    await application.start()
-    await application.updater.start_polling()
-
-    # Wait for the polling to stop
-    await application.stop()
+    await application.initialize()  # Make sure to initialize it before starting
+    await application.start_polling()  # This should keep the bot running
 
 if __name__ == '__main__':
     import asyncio
