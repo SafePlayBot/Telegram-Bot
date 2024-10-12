@@ -35,7 +35,7 @@ async def main() -> None:
 
     # Start the application with polling
     await application.initialize()  # Make sure to initialize it before starting
-    await application.start_polling()  # This should keep the bot running
+    await application.run_polling()  # Use run_polling() instead of start_polling()
 
 if __name__ == '__main__':
     import asyncio
