@@ -39,6 +39,13 @@ async def main() -> None:
 if __name__ == '__main__':
     import asyncio
 
-    # Run the main function within an asyncio event loop
-    loop = asyncio.get_event_loop()
+    try:
+        # Use the existing running loop, do not create a new one
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # If no loop is running, create a new one
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    # Run the main function within the existing event loop
     loop.run_until_complete(main())
