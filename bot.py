@@ -97,13 +97,13 @@ async def main():
     application.add_handler(CallbackQueryHandler(button_callback))
 
     # Set webhook URL with aiohttp server
-    webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
+    webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/webhook"
 
-    # Start the bot with the webhook (no need to manage the event loop manually)
+    # Start the bot with the webhook
     await application.run_webhook(
         listen="0.0.0.0",
         port=PORT,
-        url_path=webhook_url,
+        url_path='webhook',  # This is the path for the webhook
         webhook_url=webhook_url,
     )
 
