@@ -114,8 +114,8 @@ async def main():
     webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
     await application.bot.set_webhook(webhook_url)
 
-    # Keep the bot running until stopped
-    await application.updater.idle()
+    # Run the application in idle mode (keep it running)
+    await application.run_polling()
 
 if __name__ == '__main__':
     asyncio.run(main())
