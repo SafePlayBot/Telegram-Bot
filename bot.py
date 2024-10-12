@@ -3,7 +3,6 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 from aiohttp import web
-import asyncio
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -108,5 +107,5 @@ async def main():
     )
 
 if __name__ == '__main__':
-    # Just call the main function, no need for manual loop handling
-    asyncio.run(main())
+    # Start the bot
+    main()  # No need to use asyncio.run() here
