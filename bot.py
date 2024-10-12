@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 TOKEN = os.environ.get('BOT_TOKEN')
 
 # Port (to be set as an environment variable or use default)
-PORT = int(os.environ.get('PORT', 4323))
+PORT = int(os.environ.get('PORT', 8443))  # Use the dynamically assigned port
 
 # GIF URL
 GIF_URL = "https://media1.tenor.com/m/Y5vmrdIrr4wAAAAC/mehdi-casino.gif"
@@ -106,16 +106,15 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", PORT)
     await site.start()
 
-    # Initialize and start the bot's webhook
+    # Initialize the bot and start receiving updates
     await application.initialize()
-    await application.updater.start_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
-    )
-
-    # Start receiving updates
     await application.start()
+
+    # Set webhook URL with aiohttp server
+    webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
+    await application.bot.set_webhook(webhook_url)
+
+    # Keep the bot running until stopped
     await application.updater.idle()
 
 if __name__ == '__main__':
