@@ -114,14 +114,14 @@ async def main():
     webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
     await application.bot.set_webhook(webhook_url)
 
-    # Run the application in idle mode (keep it running)
-    await application.start_polling()
+    # Run the application in polling mode (if not using webhooks)
+    await application.run_polling()
 
 if __name__ == '__main__':
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            loop.create_task(main())  # If the event loop is already running, run the main() as a task
+            loop.create_task(main())  # If the event loop is already running, run main() as a task
         else:
             loop.run_until_complete(main())  # Otherwise, start the event loop
     except RuntimeError as e:
