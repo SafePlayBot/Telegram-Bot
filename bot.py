@@ -2,14 +2,18 @@ import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
+import asyncio
+from aiohttp import web
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Bot token and PORT (to be set as environment variables)
+# Bot token (to be set as an environment variable)
 TOKEN = os.environ.get('BOT_TOKEN')
-PORT = int(os.environ.get('PORT', 8443))  # Default to 8443 if not set
+
+# Port (to be set as an environment variable or use default)
+PORT = int(os.environ.get('PORT', 4323))
 
 # GIF URL
 GIF_URL = "https://media1.tenor.com/m/Y5vmrdIrr4wAAAAC/mehdi-casino.gif"
@@ -79,7 +83,14 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as e:
         logger.error(f"Error in show_preferences: {str(e)}")
 
-def main() -> None:
+async def web_app():
+    # Set up a simple web app
+    app = web.Application()
+    app.router.add_get("/", lambda request: web.Response(text="Telegram Bot is running!"))
+    return app
+
+async def main() -> None:
+    # Set up the bot application
     application = Application.builder().token(TOKEN).build()
 
     # Handler for /start command
@@ -91,13 +102,21 @@ def main() -> None:
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Start the webhook
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        url_path=TOKEN,
-        webhook_url=f"https://{os.environ.get('APP_NAME')}.onrender.com/{TOKEN}"
-    )
+    # Start the bot
+    await application.initialize()
+    await application.start()
+    
+    # Set up and start the web app
+    app = await web_app()
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', PORT)
+    await site.start()
+
+    logger.info(f"Server started on port {PORT}")
+
+    # Run the bot until the user presses Ctrl-C
+    await application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
