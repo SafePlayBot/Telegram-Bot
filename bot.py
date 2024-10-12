@@ -82,7 +82,7 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def web_handler(request):
     return web.Response(text="Telegram Bot is running!")
 
-async def main():
+async def main() -> None:
     # Set up the bot application
     application = Application.builder().token(TOKEN).build()
 
@@ -108,4 +108,5 @@ async def main():
 
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(main())  # Await the main coroutine
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())  # Use loop.run_until_complete to run the coroutine
