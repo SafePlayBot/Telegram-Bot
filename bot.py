@@ -34,16 +34,8 @@ async def main() -> None:
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
     # Start the application with polling
-    await application.initialize()  # Ensure it is initialized before starting
     await application.run_polling()  # Correct method to start polling
 
 if __name__ == '__main__':
     import asyncio
-
-    # Check if we are already in an event loop
-    try:
-        loop = asyncio.get_running_loop()
-        loop.create_task(main())  # Schedule main to run in the existing event loop
-        loop.run_forever()  # Keep the loop running
-    except RuntimeError:  # If no event loop is running, run it
-        asyncio.run(main())
+    asyncio.run(main())  # This will handle the event loop management
