@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 from aiohttp import web
 
 # Set up logging
@@ -84,7 +84,7 @@ async def web_handler(request):
 
 async def main() -> None:
     # Set up the bot application
-    application = Application.builder().token(TOKEN).build()
+    application = ApplicationBuilder().token(TOKEN).build()
 
     # Handler for /start command
     application.add_handler(CommandHandler("start", welcome))
@@ -108,5 +108,4 @@ async def main() -> None:
 
 if __name__ == '__main__':
     import asyncio
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())  # Use loop.run_until_complete to run the coroutine
+    asyncio.run(main())  # Directly run the main coroutine
