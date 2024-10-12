@@ -95,7 +95,7 @@ async def main():
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Set webhook URL with aiohttp server
+    # Set webhook URL
     webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/webhook"
 
     # Start the bot with the webhook
@@ -107,5 +107,5 @@ async def main():
     )
 
 if __name__ == '__main__':
-    # Start the bot
-    main()  # No need to use asyncio.run() here
+    import asyncio
+    asyncio.run(main())  # Await the main coroutine
