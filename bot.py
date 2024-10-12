@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Bot token (to be set as an environment variable)
 TOKEN = os.environ.get('BOT_TOKEN')
 
-# Updated welcome message and big offer
+# Welcome message and big offer for Social Casino
 WELCOME_MESSAGE = """Your ultimate social games guide
 
 🎁 Play for free 🏆 Top social games 🌍 VPN Friendly – Play from Anywhere 🔒 Safe and Secure
@@ -29,19 +29,12 @@ async def main() -> None:
     # Set up the bot application
     application = ApplicationBuilder().token(TOKEN).build()
 
-    # Initialize the application before starting it
-    await application.initialize()
-
     # Add handlers for commands and messages
     application.add_handler(CommandHandler("start", welcome))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
     # Start the bot with polling
-    await application.start()
-    await application.updater.start_polling()
-
-    # Keep the bot running
-    await application.start_polling()
+    await application.run_polling()
 
 if __name__ == '__main__':
     import asyncio
