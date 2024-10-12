@@ -106,15 +106,16 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", PORT)
     await site.start()
 
-    # Start the bot's webhook
-    await application.start()
+    # Initialize and start the bot's webhook
+    await application.initialize()
     await application.updater.start_webhook(
         listen="0.0.0.0",
         port=PORT,
         webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
     )
 
-    # Run the bot until stopped
+    # Start receiving updates
+    await application.start()
     await application.updater.idle()
 
 if __name__ == '__main__':
