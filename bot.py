@@ -36,14 +36,7 @@ async def main() -> None:
     # Start the application with polling
     await application.run_polling()
 
-# Run the bot using the appropriate method for the environment
+# Directly run the main function for event loop management
 if __name__ == '__main__':
     import asyncio
-    # Use run_async if there is already a running event loop
-    try:
-        asyncio.get_event_loop().run_until_complete(main())
-    except RuntimeError as e:
-        if str(e) == "no running event loop":
-            asyncio.run(main())  # Use run only if there is no running event loop
-        else:
-            logger.error(f"Unexpected RuntimeError: {str(e)}")
+    asyncio.run(main())
