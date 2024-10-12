@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Bot token (to be set as an environment variable)
 TOKEN = os.environ.get('BOT_TOKEN')
 
-# Welcome message and big offer for Social Casino
+# Welcome message for Social Casino
 WELCOME_MESSAGE = """Your ultimate social games guide
 
 🎁 Play for free 🏆 Top social games 🌍 VPN Friendly – Play from Anywhere 🔒 Safe and Secure
@@ -34,8 +34,16 @@ async def main() -> None:
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
     # Start the application with polling
-    await application.run_polling()  # Correct method to start polling
+    await application.run_polling()
 
+# Run the bot using the appropriate method for the environment
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(main())  # This will handle the event loop management
+    # Use run_async if there is already a running event loop
+    try:
+        asyncio.get_event_loop().run_until_complete(main())
+    except RuntimeError as e:
+        if str(e) == "no running event loop":
+            asyncio.run(main())  # Use run only if there is no running event loop
+        else:
+            logger.error(f"Unexpected RuntimeError: {str(e)}")
