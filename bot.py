@@ -7,8 +7,9 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Bot token (to be set as an environment variable)
+# Bot token and PORT (to be set as environment variables)
 TOKEN = os.environ.get('BOT_TOKEN')
+PORT = int(os.environ.get('PORT', 8443))  # Default to 8443 if not set
 
 # GIF URL
 GIF_URL = "https://media1.tenor.com/m/Y5vmrdIrr4wAAAAC/mehdi-casino.gif"
@@ -90,7 +91,13 @@ def main() -> None:
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    # Start the webhook
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url=f"https://{os.environ.get('APP_NAME')}.onrender.com/{TOKEN}"
+    )
 
 if __name__ == '__main__':
     main()
