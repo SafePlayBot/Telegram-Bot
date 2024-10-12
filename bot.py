@@ -33,19 +33,12 @@ async def main() -> None:
     application.add_handler(CommandHandler("start", welcome))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
-    # Start the bot with polling
-    await application.run_polling()
+    # Start polling without managing the event loop manually
+    await application.start()
+    await application.updater.start_polling()
 
 if __name__ == '__main__':
     import asyncio
 
-    try:
-        # Use the existing running loop, do not create a new one
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        # If no loop is running, create a new one
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    # Run the main function within the existing event loop
-    loop.run_until_complete(main())
+    # No need to manually manage the event loop here
+    asyncio.run(main())
