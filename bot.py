@@ -96,33 +96,19 @@ async def main():
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Set up the web app
-    app = web.Application()
-    app.router.add_get("/", web_handler)
-
-    # Start aiohttp server in background
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", PORT)
-    await site.start()
-
-    # Initialize the bot and start receiving updates
-    await application.initialize()
-    await application.start()
-
     # Set webhook URL with aiohttp server
     webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/"
-    await application.bot.set_webhook(webhook_url)
 
-    # Run the application in polling mode (if not using webhooks)
-    await application.run_polling()
+    # Start the bot with the webhook (no need to manage the event loop manually)
+    await application.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=webhook_url,
+        webhook_url=webhook_url,
+    )
 
 if __name__ == '__main__':
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(main())  # If the event loop is already running, run main() as a task
-        else:
-            loop.run_until_complete(main())  # Otherwise, start the event loop
+        asyncio.run(main())  # Use asyncio.run for better handling of the event loop
     except RuntimeError as e:
         logger.error(f"Runtime error: {str(e)}")
