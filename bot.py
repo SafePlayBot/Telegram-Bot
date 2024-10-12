@@ -108,7 +108,5 @@ async def main():
     )
 
 if __name__ == '__main__':
-    try:
-        asyncio.run(main())  # Use asyncio.run for better handling of the event loop
-    except RuntimeError as e:
-        logger.error(f"Runtime error: {str(e)}")
+    loop = asyncio.get_event_loop()  # Get the current event loop
+    loop.run_until_complete(main())  # Run the main function
