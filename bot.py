@@ -1,8 +1,7 @@
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
-import asyncio
 from aiohttp import web
 
 # Set up logging
@@ -39,10 +38,7 @@ PREFERENCES = {
 async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.info("Welcome message triggered")
     try:
-        # Send the GIF
         await update.message.reply_animation(GIF_URL)
-        
-        # Send the welcome message with buttons
         keyboard = [
             [InlineKeyboardButton("Activate Bot", callback_data='activate'),
              InlineKeyboardButton("Deactivate Bot", callback_data='deactivate')]
@@ -86,12 +82,7 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def web_handler(request):
     return web.Response(text="Telegram Bot is running!")
 
-async def setup_web_app():
-    app = web.Application()
-    app.router.add_get("/", web_handler)
-    return app
-
-async def main():
+def main():
     # Set up the bot application
     application = Application.builder().token(TOKEN).build()
 
@@ -104,21 +95,17 @@ async def main():
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
+    # Set up the web app
+    app = web.Application()
+    app.router.add_get("/", web_handler)
+
     # Start the bot
-    await application.initialize()
-    await application.start()
-    
-    # Set up and start the web app
-    app = await setup_web_app()
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', PORT)
-    await site.start()
-
-    logger.info(f"Server started on port {PORT}")
-
-    # Run the bot until the user presses Ctrl-C
-    await application.run_polling(allowed_updates=Update.ALL_TYPES)
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        webhook_url=f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}.onrender.com/",
+        web_app=app
+    )
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
