@@ -75,7 +75,7 @@ async def show_preferences(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as e:
         logger.error(f"Error in show_preferences: {str(e)}")
 
-async def main() -> None:
+def main() -> None:
     # Set up the bot application
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -88,9 +88,12 @@ async def main() -> None:
     # Handler for button callbacks
     application.add_handler(CallbackQueryHandler(button_callback))
 
-    # Start the bot with polling (instead of webhook)
-    await application.run_polling()
+    # Start the bot with polling
+    application.run_polling()
 
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(main())  # Directly run the main coroutine
+
+    # Get the current event loop and run the main function
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
