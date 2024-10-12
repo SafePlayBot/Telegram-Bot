@@ -108,5 +108,5 @@ async def main():
     )
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()  # Get the current event loop
-    loop.run_until_complete(main())  # Run the main function
+    # Just call the main function, no need for manual loop handling
+    asyncio.run(main())
