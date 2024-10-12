@@ -115,7 +115,14 @@ async def main():
     await application.bot.set_webhook(webhook_url)
 
     # Run the application in idle mode (keep it running)
-    await application.run_polling()
+    await application.start_polling()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(main())  # If the event loop is already running, run the main() as a task
+        else:
+            loop.run_until_complete(main())  # Otherwise, start the event loop
+    except RuntimeError as e:
+        logger.error(f"Runtime error: {str(e)}")
