@@ -27,23 +27,7 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         logger.error(f"Error in welcome message: {str(e)}")
 
-async def setup_webhook(app, application):
-    # Set the webhook
-    webhook_url = f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}/{TOKEN}'
-    await application.bot.set_webhook(url=webhook_url)
-    logger.info(f"Webhook set to {webhook_url}")
-
-    @app.route('/' + TOKEN, methods=['POST'])
-    def webhook():
-        update = Update.de_json(request.get_json(force=True), application.bot)
-        asyncio.run(application.process_update(update))
-        return 'OK'
-
-    @app.route('/')
-    def index():
-        return 'Hello, World!'
-
-def main() -> None:
+async def setup_application():
     # Set up the bot application
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -51,11 +35,34 @@ def main() -> None:
     application.add_handler(CommandHandler("start", welcome))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
+    # Initialize the application
+    await application.initialize()
+    return application
+
+async def setup_webhook(app, application):
+    # Set the webhook
+    webhook_url = f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}/{TOKEN}'
+    await application.bot.set_webhook(url=webhook_url)
+    logger.info(f"Webhook set to {webhook_url}")
+
+    @app.route('/' + TOKEN, methods=['POST'])
+    async def webhook():
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        await application.process_update(update)
+        return 'OK'
+
+    @app.route('/')
+    def index():
+        return 'Hello, World!'
+
+def main() -> None:
     # Create a Flask app
     app = Flask(__name__)
 
-    # Set up the webhook
-    asyncio.run(setup_webhook(app, application))
+    # Set up the application and webhook
+    loop = asyncio.get_event_loop()
+    application = loop.run_until_complete(setup_application())
+    loop.run_until_complete(setup_webhook(app, application))
 
     # Run the Flask app
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8443)))
