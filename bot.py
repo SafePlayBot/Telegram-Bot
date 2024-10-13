@@ -2,6 +2,7 @@ import os
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from flask import Flask, request
 
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -33,8 +34,24 @@ def main() -> None:
     application.add_handler(CommandHandler("start", welcome))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, welcome))
 
-    # Start the application with polling
-    application.run_polling()
+    # Create a Flask app
+    app = Flask(__name__)
+
+    @app.route('/' + TOKEN, methods=['POST'])
+    def webhook():
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        application.process_update(update)
+        return 'OK'
+
+    @app.route('/')
+    def index():
+        return 'Hello, World!'
+
+    # Set the webhook
+    application.bot.set_webhook(url=f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}/{TOKEN}')
+
+    # Run the Flask app
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8443)))
 
 # Directly run the main function
 if __name__ == '__main__':
