@@ -1,5 +1,6 @@
 import os
 import logging
+import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from flask import Flask, request
@@ -26,6 +27,22 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         logger.error(f"Error in welcome message: {str(e)}")
 
+async def setup_webhook(app, application):
+    # Set the webhook
+    webhook_url = f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}/{TOKEN}'
+    await application.bot.set_webhook(url=webhook_url)
+    logger.info(f"Webhook set to {webhook_url}")
+
+    @app.route('/' + TOKEN, methods=['POST'])
+    def webhook():
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        asyncio.run(application.process_update(update))
+        return 'OK'
+
+    @app.route('/')
+    def index():
+        return 'Hello, World!'
+
 def main() -> None:
     # Set up the bot application
     application = ApplicationBuilder().token(TOKEN).build()
@@ -37,18 +54,8 @@ def main() -> None:
     # Create a Flask app
     app = Flask(__name__)
 
-    @app.route('/' + TOKEN, methods=['POST'])
-    def webhook():
-        update = Update.de_json(request.get_json(force=True), application.bot)
-        application.process_update(update)
-        return 'OK'
-
-    @app.route('/')
-    def index():
-        return 'Hello, World!'
-
-    # Set the webhook
-    application.bot.set_webhook(url=f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}/{TOKEN}')
+    # Set up the webhook
+    asyncio.run(setup_webhook(app, application))
 
     # Run the Flask app
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8443)))
