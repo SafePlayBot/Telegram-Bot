@@ -12,16 +12,25 @@ logger = logging.getLogger(__name__)
 TOKEN = os.environ.get('BOT_TOKEN')
 
 # Welcome message for Social Casino
-WELCOME_MESSAGE = """🎉 Welcome to Your Ultimate Social Games Guide! 🎉
+WELCOME_MESSAGE = """🎮 Welcome to Safeplay! 🎮
+Your ultimate guide to navigating the exciting world of online gaming and casinos, all with safety and fun in mind! ✨
 
-🎁 Play for free
-🏆 Top social games
-🌍 VPN Friendly – Play from Anywhere
-🔒 Safe and Secure
+Whether you're a seasoned player or just getting started, Safeplay has got you covered. Explore everything from crypto casinos to responsible gaming tips, and so much more! 🚀
 
-Start your adventure: https://miniclip.com/
+Here’s a quick guide to get you started:
 
-Type /help to see all available commands!"""
+    /license - Learn about gambling licenses 🎫
+    /crypto - Dive into the world of crypto casinos 💸
+    /providers - Discover popular slot providers 🎰
+    /bonuses - Unlock the secrets of casino bonuses 🎁
+    /paymentmethods - Check out payment options 💳
+    /responsiblegaming - Play responsibly with our tips 🎯
+    /games - Explore the most popular online gambling games 🎲
+    /rttpayouts - Understand RTP (Return to Player) 📊
+    /casinoreviews - Read trusted casino reviews ⭐
+    /trends - Stay updated on the latest trends in online gambling 🔥
+
+Feel free to type a command and let's get started! 🎉"""
 
 # Help message
 HELP_MESSAGE = """Available commands:
