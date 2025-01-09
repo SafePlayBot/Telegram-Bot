@@ -12,25 +12,16 @@ logger = logging.getLogger(__name__)
 TOKEN = os.environ.get('BOT_TOKEN')
 
 # Welcome message for Social Casino
-WELCOME_MESSAGE = """🎮 Welcome to Safeplay! 🎮
-Your ultimate guide to navigating the exciting world of online gaming and casinos, all with safety and fun in mind! ✨
+WELCOME_MESSAGE = """🎉 Welcome to Your Ultimate Social Games Guide! 🎉
 
-Whether you're a seasoned player or just getting started, Safeplay has got you covered. Explore everything from crypto casinos to responsible gaming tips, and so much more! 🚀
+🎁 Play for free
+🏆 Top social games
+🌍 VPN Friendly – Play from Anywhere
+🔒 Safe and Secure
 
-Here’s a quick guide to get you started:
+Start your adventure: https://miniclip.com/
 
-    /license - Learn about gambling licenses 🎫
-    /crypto - Dive into the world of crypto casinos 💸
-    /providers - Discover popular slot providers 🎰
-    /bonuses - Unlock the secrets of casino bonuses 🎁
-    /paymentmethods - Check out payment options 💳
-    /responsiblegaming - Play responsibly with our tips 🎯
-    /games - Explore the most popular online gambling games 🎲
-    /rttpayouts - Understand RTP (Return to Player) 📊
-    /casinoreviews - Read trusted casino reviews ⭐
-    /trends - Stay updated on the latest trends in online gambling 🔥
-
-Feel free to type a command and let's get started! 🎉"""
+Type /help to see all available commands!"""
 
 # Help message
 HELP_MESSAGE = """Available commands:
@@ -223,15 +214,26 @@ app = Flask(__name__)
 
 @app.route('/' + TOKEN, methods=['POST'])
 def webhook():
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    application.process_update(update)
-    return 'OK'
+    try:
+        logger.info("Webhook received")
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        application.process_update(update)
+        return 'OK'
+    except Exception as e:
+        logger.error(f"Error in webhook: {str(e)}")
+        return 'Error', 500
 
 @app.route('/')
 def index():
     return 'Hello, World!'
 
+@app.route('/test', methods=['GET'])
+def test():
+    return 'Bot is running!'
+
 if __name__ == '__main__':
+    # Initialize your bot application here
+    application.initialize()
     # Start the Flask app
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
